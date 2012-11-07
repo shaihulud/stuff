@@ -27,7 +27,6 @@ REGEXP_FIND = re.compile(
 )
 
 
-
 def _str_prepare(string):
     return string.strip().replace('\n', '\\n')
 
@@ -59,6 +58,7 @@ def check_py(path):
     for tok in tokenize.generate_tokens(io_obj.readline):
         token_type = tok[0]
         token_string = tok[1].decode('utf-8')
+        start_line, start_col = tok[2]
 
         if token_type == tokenize.OP and token_string == '(' and inside_gettext:
             inside_gettext += 1
@@ -71,7 +71,8 @@ def check_py(path):
             inside_gettext = 1
 
         if (token_type == tokenize.STRING and not inside_gettext and
-            prev_token_type not in [tokenize.INDENT, tokenize.NEWLINE]):
+            prev_token_type not in [tokenize.INDENT, tokenize.NEWLINE] and
+            start_col):
             if len(REGEXP_RUS_LETTER.findall(token_string)):
                 out.append(tok)
 
@@ -101,6 +102,11 @@ def check_html(path):
 
 
 def check_js(path):
+    from pynarcissus import parse
+    pass
+
+
+def check_jst(path):
     """
     OTA.utils.gettext('Январь')
     OTA.utils.gettext('за {$nights} ночь|за {$nights} ночи|за {$nights} ночей')
@@ -112,8 +118,8 @@ def check_js(path):
 
 TRANSLATION_CHECKERS = {
     'py': check_py,
-    'js': check_js,
-    'jst': check_js,
+    'js': check_jst,
+    'jst': check_jst,
     'html': check_html,
 }
 
