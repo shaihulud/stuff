@@ -18,11 +18,15 @@ REGEXP_HTML_SUB = re.compile(
     flags=re.DOTALL
 )
 REGEXP_JS_SUB = re.compile(  #regexp += '//.*?\n'
-    'OTA\.utils\.gettext\(".*?"\)|' + "OTA\.utils\.gettext\('.*?'\)|",
+    'OTA\.utils\.gettext\(".*?"\)|' + "OTA\.utils\.gettext\('.*?'\)",
     flags=re.DOTALL
 )
 REGEXP_FIND = re.compile(
     u'[а-яА-ЯёЁ]+[^<]*|[а-яА-ЯёЁ]+[^>]*',
+    flags=re.DOTALL
+)
+REGEXP_FIND_JS = re.compile(
+    u'"[^"]*?[а-яА-ЯёЁ]+[^"]*?"|' + u"'[^']*?[а-яА-ЯёЁ]+[^']*?'",
     flags=re.DOTALL
 )
 
@@ -31,8 +35,8 @@ def _str_prepare(string):
     return string.strip().replace('\n', '\\n')
 
 
-def _print_found(text, path):
-    rus_str = REGEXP_FIND.findall(text)
+def _print_found(text, path, regexp=REGEXP_FIND):
+    rus_str = regexp.findall(text)
     const_dict = dict((i, rus_str.count(i)) for i in rus_str)
 
     if const_dict:
@@ -102,8 +106,13 @@ def check_html(path):
 
 
 def check_js(path):
-    from pynarcissus import parse
-    pass
+    """
+    OTA.utils.gettext('Январь')
+    OTA.utils.gettext('за {$nights} ночь|за {$nights} ночи|за {$nights} ночей')
+    """
+    text = open(path, 'r').read().decode('utf-8')
+    text = REGEXP_JS_SUB.sub('', text)
+    _print_found(text, path, regexp=REGEXP_FIND_JS)
 
 
 def check_jst(path):
@@ -118,7 +127,7 @@ def check_jst(path):
 
 TRANSLATION_CHECKERS = {
     'py': check_py,
-    'js': check_jst,
+    'js': check_js,
     'jst': check_jst,
     'html': check_html,
 }
