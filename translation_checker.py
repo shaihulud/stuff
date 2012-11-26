@@ -14,7 +14,7 @@ except ImportError:
 
 REGEXP_RUS_LETTER = re.compile(u'[а-яА-ЯёЁ]+')
 REGEXP_HTML_SUB = re.compile(
-    '\{%[ ]*blocktrans.*?endblocktrans[ ]*%\}|{%[ ]*trans.*?%\}|<!.*?>',
+    '\{%[ ]*blocktrans.*?endblocktrans[ ]*%\}|{%[ ]*trans.*?%\}|<!.*?>|\{%[ ]*comment.*?endcomment[ ]*%\}',
     flags=re.DOTALL
 )
 REGEXP_JS_SUB = re.compile(  #regexp += '//.*?\n'
